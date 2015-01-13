@@ -1,0 +1,55 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:paddingBottom="@dimen/activity_vertical_margin"
+    android:paddingLeft="@dimen/activity_horizontal_margin"
+    android:paddingRight="@dimen/activity_horizontal_margin"
+    android:paddingTop="@dimen/activity_vertical_margin"
+    tools:context="com.example.datetime_picker_demo.android.AndroidDatePickerDialogActivity" >
+
+    <Button
+        android:id="@+id/btn_android_datepicker_dialog_show"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:text="DefalutDatePickerDialog" />
+
+    <Button
+        android:id="@+id/btn_android_datepicker_dialog_show_noCalendar"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/btn_android_datepicker_dialog_show"
+        android:layout_below="@+id/btn_android_datepicker_dialog_show"
+        android:layout_marginTop="14dp"
+        android:text="DefalutDatePickerDialog\nNoCalendar" />
+
+    <Button
+        android:id="@+id/btn_android_datepicker_dialog_show_theme_HOLO_DARK"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/btn_android_datepicker_dialog_show_noCalendar"
+        android:layout_below="@+id/btn_android_datepicker_dialog_show_noCalendar"
+        android:layout_marginTop="14dp"
+        android:text="DefalutDatePickerDialog\nshow_theme_HOLO_DARK" />
+
+    <Button
+        android:id="@+id/btn_android_datepicker_dialog_show_theme_SELF"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignLeft="@+id/btn_android_datepicker_dialog_show_theme_HOLO_DARK"
+        android:layout_below="@+id/btn_android_datepicker_dialog_show_theme_HOLO_DARK"
+        android:layout_marginTop="14dp"
+        android:text="DefalutDatePickerDialog\nshow_theme_SELF" />
+
+    <TextView
+        android:id="@+id/tv_android_datepicker_dialog_show"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/btn_android_datepicker_dialog_show_theme_SELF"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="25dp"
+        android:hint="showChooseDate" />
+
+</RelativeLayout>
