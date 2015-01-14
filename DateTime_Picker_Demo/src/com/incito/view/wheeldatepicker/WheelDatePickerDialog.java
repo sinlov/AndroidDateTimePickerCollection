@@ -15,12 +15,16 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.content.DialogInterface.OnClickListener;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
+import android.os.SystemClock;
 import android.util.DisplayMetrics;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.WindowManager;
 
+import java.lang.ref.WeakReference;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.List;
@@ -44,7 +48,7 @@ public class WheelDatePickerDialog extends AlertDialog implements OnClickListene
     private static final String HOUR_ZH = "时";
     private static final String MINUTE = "minute";
     private static final String MINUTE_ZH = "分";
-    private static int START_YEAR = 1970, END_YEAR = 2100;
+    private static int START_YEAR = 1970, END_YEAR = 2100, MSG_CHANGE_DATE_OF_MONTH = 1000, SLEEP_TIME_CHANGE = 20;
     private String[] months_big = { "1", "3", "5", "7", "8", "10", "12" };
     private String[] months_little = { "4", "6", "9", "11" };
     private final List<String> list_big = Arrays.asList(months_big);
@@ -52,11 +56,11 @@ public class WheelDatePickerDialog extends AlertDialog implements OnClickListene
 
     private final OnWheelDateSetListener mCallBack;
     private final Calendar mCalendar;
-    private final WheelView wv_year;
-    private final WheelView wv_month;
-    private final WheelView wv_day;
-    private final WheelView wv_hours;
-    private final WheelView wv_mins;
+    private final WheelView WV_YEAR;
+    private final WheelView WV_MONTH;
+    private final WheelView WV_DAY_OF_MONTH;
+    private final WheelView WV_HOURS;
+    private final WheelView WV_MINUTE;
     private NumericWheelAdapter year_NumericWheelAdapter;
     private NumericWheelAdapter month_NumericWheelAdapter;
     private NumericWheelAdapter day_NumericWheelAdapter;
@@ -65,9 +69,10 @@ public class WheelDatePickerDialog extends AlertDialog implements OnClickListene
     private OnWheelChangedListener wheelChangedListener_year;
     private OnWheelChangedListener wheelChangedListener_month;
     private int densityDpi = 100;
-
+    private SaftHandler myHandler;
     private boolean mTitleNeedsUpdate = true;
-
+    
+    
     /**
      * The callback used to indicate the user is done filling in the date.
      */
@@ -114,7 +119,7 @@ public class WheelDatePickerDialog extends AlertDialog implements OnClickListene
         super(context, theme);
         mCallBack = callBack;
         mCalendar = Calendar.getInstance();
-
+        myHandler = new SaftHandler(this);
         Context themeContext = getContext();
         setButton(BUTTON_POSITIVE, themeContext.getText(android.R.string.ok), this);
         setIcon(0);
@@ -122,19 +127,19 @@ public class WheelDatePickerDialog extends AlertDialog implements OnClickListene
                 (LayoutInflater) themeContext.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         View view = inflater.inflate(R.layout.wheel_datepick_dialog_layout, null);
         setView(view);
-        wv_year = (WheelView)view.findViewById(R.id.wv_date_picker_year);
-        wv_month = (WheelView)view.findViewById(R.id.wv_date_picker_month);
-        wv_day = (WheelView)view.findViewById(R.id.wv_date_picker_day);
-        wv_hours = (WheelView)view.findViewById(R.id.wv_date_picker_hour);
-        wv_mins = (WheelView)view.findViewById(R.id.wv_date_picker_mins);
-        
+        WV_YEAR = (WheelView)view.findViewById(R.id.wv_date_picker_year);
+        WV_MONTH = (WheelView)view.findViewById(R.id.wv_date_picker_month);
+        WV_DAY_OF_MONTH = (WheelView)view.findViewById(R.id.wv_date_picker_day);
+        WV_HOURS = (WheelView)view.findViewById(R.id.wv_date_picker_hour);
+        WV_MINUTE = (WheelView)view.findViewById(R.id.wv_date_picker_mins);
+
         densityDpi = getDisplayMetricsDPI();
-        
-        setWheelViewTextSize(wv_year, dayOfMonth);
-        setWheelViewTextSize(wv_month, dayOfMonth);
-        setWheelViewTextSize(wv_day, dayOfMonth);
-        setWheelViewTextSize(wv_hours, dayOfMonth);
-        setWheelViewTextSize(wv_mins, dayOfMonth);
+
+        setWheelViewTextSize(WV_YEAR, dayOfMonth);
+        setWheelViewTextSize(WV_MONTH, dayOfMonth);
+        setWheelViewTextSize(WV_DAY_OF_MONTH, dayOfMonth);
+        setWheelViewTextSize(WV_HOURS, dayOfMonth);
+        setWheelViewTextSize(WV_MINUTE, dayOfMonth);
         showNowDateTimePicker();
         addCustomWheelChangedListener();
     }
@@ -197,13 +202,13 @@ public class WheelDatePickerDialog extends AlertDialog implements OnClickListene
         int minute = mCalendar.get(Calendar.MINUTE);
 
         //Initialize year wheel
-        setWheelView(wv_year, 
+        setWheelView(WV_YEAR, 
                 bulidNumericWheelAdapter(year_NumericWheelAdapter, START_YEAR, END_YEAR),
                 true,
                 YEAR_ZH,
                 year - START_YEAR);
         //Initialize month wheel
-        setWheelView(wv_month, 
+        setWheelView(WV_MONTH, 
                 bulidNumericWheelAdapter(month_NumericWheelAdapter, 1, 12),
                 true,
                 MONTH_ZH,
@@ -226,16 +231,16 @@ public class WheelDatePickerDialog extends AlertDialog implements OnClickListene
                 day_NumericWheelAdapter = bulidNumericWheelAdapter(day_NumericWheelAdapter, 1, 28);
             }
         }
-        setWheelView(wv_day, day_NumericWheelAdapter, true, DAY_ZH, (day - 1));
+        setWheelView(WV_DAY_OF_MONTH, day_NumericWheelAdapter, true, DAY_ZH, (day - 1));
         //Initialize hour wheel;
-        setWheelView(wv_hours, 
+        setWheelView(WV_HOURS, 
                 bulidNumericWheelAdapter(hours_NumericWheelAdapter, 0, 23),
                 true,
                 HOUR_ZH,
                 hour);
         //Initialize minute wheel;
-        setWheelView(wv_mins, 
-                bulidNumericWheelAdapter(mins_NumericWheelAdapter, 0, 23),
+        setWheelView(WV_MINUTE, 
+                bulidNumericWheelAdapter(mins_NumericWheelAdapter, 0, 59),
                 true,
                 MINUTE_ZH,
                 minute);
@@ -294,7 +299,7 @@ public class WheelDatePickerDialog extends AlertDialog implements OnClickListene
             return false;
         }
     }
-    
+
     /**
      * add custom wheel changed listener
      * @description 
@@ -308,94 +313,126 @@ public class WheelDatePickerDialog extends AlertDialog implements OnClickListene
                 @Override
                 public void onChanged(WheelView wheel, int oldValue, int newValue) {
                     int year_num = newValue + START_YEAR;
-                    String tempMonth = String.valueOf(wv_month.getCurrentItem() + 1);
+                    String tempMonth = String.valueOf(WV_MONTH.getCurrentItem() + 1);
                     boolean isBigMoth = list_big.contains(tempMonth);
                     boolean isLittleMoth = list_little.contains(tempMonth);
+                    int tempDayOfMonthScroll = WV_DAY_OF_MONTH.getCurrentItem();
+                    boolean isDayOfMonthNeedScroll = tempDayOfMonthScroll > 27 ;
                     if (isBigMoth) {
                         bulidNumericWheelAdapter(day_NumericWheelAdapter, 1, 31);
-                        wv_day.setAdapter(day_NumericWheelAdapter);
+                        WV_DAY_OF_MONTH.setAdapter(day_NumericWheelAdapter);
                     }else if (isLittleMoth) {
                         bulidNumericWheelAdapter(day_NumericWheelAdapter, 1, 30);
-                        wv_day.setAdapter(day_NumericWheelAdapter);
+                        WV_DAY_OF_MONTH.setAdapter(day_NumericWheelAdapter);
+                        if (isDayOfMonthNeedScroll) {
+                            SystemClock.sleep(SLEEP_TIME_CHANGE);
+                            myHandler.obtainMessage(MSG_CHANGE_DATE_OF_MONTH).sendToTarget();
+                        }
                     }else {
                         if (isLeapYear(year_num)) {
                             bulidNumericWheelAdapter(day_NumericWheelAdapter, 1, 29);
-                            wv_day.setAdapter(day_NumericWheelAdapter);
+                            WV_DAY_OF_MONTH.setAdapter(day_NumericWheelAdapter);
+                            if (isDayOfMonthNeedScroll) {
+                                SystemClock.sleep(SLEEP_TIME_CHANGE);
+                                myHandler.obtainMessage(MSG_CHANGE_DATE_OF_MONTH).sendToTarget();
+                            }
                         }else {
                             bulidNumericWheelAdapter(day_NumericWheelAdapter, 1, 28);
-                            wv_day.setAdapter(day_NumericWheelAdapter);
+                            WV_DAY_OF_MONTH.setAdapter(day_NumericWheelAdapter);
+                            if (isDayOfMonthNeedScroll) {
+                                SystemClock.sleep(SLEEP_TIME_CHANGE);
+                                myHandler.obtainMessage(MSG_CHANGE_DATE_OF_MONTH).sendToTarget();
+                            }
                         }
                     }
                 }
             };
         }
-        
+
         if (wheelChangedListener_month == null) {
             wheelChangedListener_month = new OnWheelChangedListener() {
-                
+
                 @Override
                 public void onChanged(WheelView wheel, int oldValue, int newValue) {
                     int month_num = newValue + 1;
                     String tempMonth = String.valueOf(month_num);
                     boolean isBigMoth = list_big.contains(tempMonth);
                     boolean isLittleMoth = list_little.contains(tempMonth);
+                    int tempDayOfMonthScroll = WV_DAY_OF_MONTH.getCurrentItem();
+                    boolean isDayOfMonthNeedScroll = tempDayOfMonthScroll > 27 ;
+
                     if (isBigMoth) {
                         bulidNumericWheelAdapter(day_NumericWheelAdapter, 1, 31);
-                        wv_day.setAdapter(day_NumericWheelAdapter);
+                        WV_DAY_OF_MONTH.setAdapter(day_NumericWheelAdapter);
                     }else if (isLittleMoth) {
                         bulidNumericWheelAdapter(day_NumericWheelAdapter, 1, 30);
-                        wv_day.setAdapter(day_NumericWheelAdapter);
-                        
+                        WV_DAY_OF_MONTH.setAdapter(day_NumericWheelAdapter);
+                        if (isDayOfMonthNeedScroll) {
+                            SystemClock.sleep(SLEEP_TIME_CHANGE);
+                            myHandler.obtainMessage(MSG_CHANGE_DATE_OF_MONTH).sendToTarget();
+                        }
+
                     }else {
-                        if (isLeapYear(wv_year.getCurrentItem() + START_YEAR)) {
+                        if (isLeapYear(WV_YEAR.getCurrentItem() + START_YEAR)) {
                             bulidNumericWheelAdapter(day_NumericWheelAdapter, 1, 29);
-                            wv_day.setAdapter(day_NumericWheelAdapter);
+                            WV_DAY_OF_MONTH.setAdapter(day_NumericWheelAdapter);
+                            if (isDayOfMonthNeedScroll) {
+                                SystemClock.sleep(SLEEP_TIME_CHANGE);
+                                myHandler.obtainMessage(MSG_CHANGE_DATE_OF_MONTH).sendToTarget();
+                            }
                         }else {
                             bulidNumericWheelAdapter(day_NumericWheelAdapter, 1, 28);
-                            wv_day.setAdapter(day_NumericWheelAdapter);
+                            WV_DAY_OF_MONTH.setAdapter(day_NumericWheelAdapter);
+                            if (isDayOfMonthNeedScroll ) {
+                                SystemClock.sleep(SLEEP_TIME_CHANGE);
+                                myHandler.obtainMessage(MSG_CHANGE_DATE_OF_MONTH).sendToTarget();
+                            }
                         }
                     }
                     
                 }
             };
         }
-        wv_year.addChangingListener(wheelChangedListener_year);
-        wv_month.addChangingListener(wheelChangedListener_month);
+        WV_YEAR.addChangingListener(wheelChangedListener_year);
+        WV_MONTH.addChangingListener(wheelChangedListener_month);
     }
-    
+
     private void tryNotifyDateSet(){
         if (mCallBack != null) {
-            mCallBack.onDateSet(wv_year.getCurrentItem(),
-                    wv_month.getCurrentItem(),
-                    wv_day.getCurrentItem(),
-                    wv_hours.getCurrentItem(),
-                    wv_mins.getCurrentItem());
+            mCallBack.onDateSet(WV_YEAR.getCurrentItem(),
+                    WV_MONTH.getCurrentItem(),
+                    WV_DAY_OF_MONTH.getCurrentItem(),
+                    WV_HOURS.getCurrentItem(),
+                    WV_MINUTE.getCurrentItem());
         }
     }
-    
+
     @Override
     public void onClick(DialogInterface dialog, int which) {
         tryNotifyDateSet();
     }
-    
-//    private void updateDateTime(int year, int month, int dayofMonth, int hour, int minute){
-//        
-//    }
 
+    @Override
+    protected void onStart() {
+        // TODO Auto-generated method stub
+        super.onStart();
+    }
+    
     @Override
     protected void onStop() {
         tryNotifyDateSet();
         super.onStop();
     }
 
+
     @Override
     public Bundle onSaveInstanceState() {
         Bundle state = super.onSaveInstanceState();
-        state.putInt(YEAR, wv_year.getCurrentItem());
-        state.putInt(MONTH, wv_month.getCurrentItem());
-        state.putInt(DAY, wv_day.getCurrentItem());
-        state.putInt(HOUR, wv_hours.getCurrentItem());
-        state.putInt(MINUTE, wv_mins.getCurrentItem());
+        state.putInt(YEAR, WV_YEAR.getCurrentItem());
+        state.putInt(MONTH, WV_MONTH.getCurrentItem());
+        state.putInt(DAY, WV_DAY_OF_MONTH.getCurrentItem());
+        state.putInt(HOUR, WV_HOURS.getCurrentItem());
+        state.putInt(MINUTE, WV_MINUTE.getCurrentItem());
         return state;
     }
 
@@ -407,11 +444,11 @@ public class WheelDatePickerDialog extends AlertDialog implements OnClickListene
         int day = savedInstanceState.getInt(DAY);
         int hour = savedInstanceState.getInt(HOUR);
         int minute = savedInstanceState.getInt(MINUTE);
-        wv_year.setCurrentItem(year);
-        wv_month.setCurrentItem(month);
-        wv_day.setCurrentItem(day);
-        wv_hours.setCurrentItem(hour);
-        wv_mins.setCurrentItem(minute);
+        WV_YEAR.setCurrentItem(year);
+        WV_MONTH.setCurrentItem(month);
+        WV_DAY_OF_MONTH.setCurrentItem(day);
+        WV_HOURS.setCurrentItem(hour);
+        WV_MINUTE.setCurrentItem(minute);
     }
     /**
      * get Display Metrics DPI
@@ -440,5 +477,23 @@ public class WheelDatePickerDialog extends AlertDialog implements OnClickListene
      */
     private void setWheelViewTextSize(WheelView wheelview, int textSize){
         wheelview.TEXT_SIZE = textSize * 3;
+    }
+    
+    private static class SaftHandler extends Handler{
+        private static WeakReference<WheelDatePickerDialog> wrWheelDatePickerDialog;
+        public SaftHandler(WheelDatePickerDialog mWheelDatePickerDialog){
+            wrWheelDatePickerDialog = new WeakReference<WheelDatePickerDialog>(mWheelDatePickerDialog);
+        }
+        public WeakReference<WheelDatePickerDialog> get(){
+            return wrWheelDatePickerDialog;
+        }
+        @Override
+        public void handleMessage(Message msg) {
+            // msg is 
+            super.handleMessage(msg);
+            if (msg.what == MSG_CHANGE_DATE_OF_MONTH) {
+                wrWheelDatePickerDialog.get().WV_DAY_OF_MONTH.setCurrentItem(0, false);
+            }
+        }
     }
 }
