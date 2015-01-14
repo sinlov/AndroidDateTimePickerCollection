@@ -33,9 +33,11 @@ mOnWheelDateSetListener = new OnWheelDateSetListener() {
                         );
             }
         };
-Take care of the time format
+<li>Take care of the time format
 
 year The year that was set and it must + START_YEAR START_YEAR = 1970 or you can set START_YEAR.
+
 monthOfYear The month that was set (0-11) for compatibility with java.util.Calendar.
-dayOfMonth The day of the month that was set must +1 .
+
+~dayOfMonth The day of the month that was set must +1 .
 
