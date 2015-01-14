@@ -75,7 +75,7 @@ public class WheelDatePickerDialog extends AlertDialog implements OnClickListene
 
         /**
          * @param year The year that was set and it must + START_YEAR
-         * \n START_YEAR = 1970 or you can set START_YEAR.
+         * START_YEAR = 1970 or you can set START_YEAR.
          * @param monthOfYear The month that was set (0-11) for compatibility
          *  with {@link java.util.Calendar}.
          * @param dayOfMonth The day of the month that was set must +1 .
@@ -392,7 +392,7 @@ public class WheelDatePickerDialog extends AlertDialog implements OnClickListene
     public Bundle onSaveInstanceState() {
         Bundle state = super.onSaveInstanceState();
         state.putInt(YEAR, wv_year.getCurrentItem());
-        state.putInt(MINUTE, wv_month.getCurrentItem());
+        state.putInt(MONTH, wv_month.getCurrentItem());
         state.putInt(DAY, wv_day.getCurrentItem());
         state.putInt(HOUR, wv_hours.getCurrentItem());
         state.putInt(MINUTE, wv_mins.getCurrentItem());
