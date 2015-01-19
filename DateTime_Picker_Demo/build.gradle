@@ -40,29 +40,29 @@ android {
         release.setRoot('build-types/release')
         // more apk
         one{
-        	manifest.srcFile 'tests/AndroidManifest1.xml'
+            manifest.srcFile 'tests/AndroidManifest1.xml'
         }
         two{
-        	manifest.srcFile 'tests/AndroidManifest2.xml'
+            manifest.srcFile 'tests/AndroidManifest2.xml'
         }
         instrumentTest.setRoot('tests')
     }
     productFlavors {
-   		one {
-      		//set package name
-      	 	packageName "com.incito.testone"
-    	}
-    	two {
-    		packageName "com.incito.testtwo"
-    	}
+        one {
+            //set package name
+            packageName "com.incito.testone"
+        }
+        two {
+            packageName "com.incito.testtwo"
+        }
     }
     //签名    
-  	signingConfigs {
-    	myConfig {
-     	 storeFile file("sinlov.keystore") //sign file    
-     	 storePassword "sinlov123"
-     	 keyAlias "sinlov"
-     	 keyPassword "sinlov123"  
-    	}
+    signingConfigs {
+        myConfig {
+         storeFile file("sinlov.keystore") //sign file    
+         storePassword "sinlov123"
+         keyAlias "sinlov"
+         keyPassword "sinlov123"  
+        }
   }
 }
