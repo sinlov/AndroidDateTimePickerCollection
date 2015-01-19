@@ -135,11 +135,11 @@ public class WheelDatePickerDialog extends AlertDialog implements OnClickListene
 
         densityDpi = getDisplayMetricsDPI();
 
-        setWheelViewTextSize(WV_YEAR, dayOfMonth);
-        setWheelViewTextSize(WV_MONTH, dayOfMonth);
-        setWheelViewTextSize(WV_DAY_OF_MONTH, dayOfMonth);
-        setWheelViewTextSize(WV_HOURS, dayOfMonth);
-        setWheelViewTextSize(WV_MINUTE, dayOfMonth);
+        setWheelViewTextSize(WV_YEAR, densityDpi);
+        setWheelViewTextSize(WV_MONTH, densityDpi);
+        setWheelViewTextSize(WV_DAY_OF_MONTH, densityDpi);
+        setWheelViewTextSize(WV_HOURS, densityDpi);
+        setWheelViewTextSize(WV_MINUTE, densityDpi);
         showNowDateTimePicker();
         addCustomWheelChangedListener();
     }
@@ -476,7 +476,7 @@ public class WheelDatePickerDialog extends AlertDialog implements OnClickListene
      * @param textSize
      */
     private void setWheelViewTextSize(WheelView wheelview, int textSize){
-        wheelview.TEXT_SIZE = textSize * 3;
+        wheelview.TEXT_SIZE = (int) (textSize * 0.2);
     }
     
     private static class SaftHandler extends Handler{

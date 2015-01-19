@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="com.example.datetime_picker_demo"
     android:versionCode="1"
-     >
+    android:versionName="1.1" >
 
     <uses-sdk
         android:minSdkVersion="14"
@@ -14,7 +14,7 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name=".MainActivity"
+            android:name="com.example.datetime_picker_demo.MainActivity"
             android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -23,15 +23,15 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".android.AndroidTimePickerActiviy"
+            android:name="com.example.datetime_picker_demo.android.AndroidTimePickerActiviy"
             android:label="@string/title_activity_data_picker_activiy" >
         </activity>
         <activity
-            android:name=".android.AndroidDatePickerActivity"
+            android:name="com.example.datetime_picker_demo.android.AndroidDatePickerActivity"
             android:label="@string/title_activity_android_date_picker" >
         </activity>
         <activity
-            android:name=".android.AndroidDatePickerDialogActivity"
+            android:name="com.example.datetime_picker_demo.android.AndroidDatePickerDialogActivity"
             android:label="@string/title_activity_date_picker_dialog" >
         </activity>
         <activity
